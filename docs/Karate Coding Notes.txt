@@ -1,0 +1,1686 @@
+Path to download: https://gitlabee.dt.renault.com/shared/boilerplate/black-box-testing/functionnal/ui
+
+SAMPLE API SITES
+******************
+https://reqres.in/
+
+
+
+VARIABLE DECLARATION
+************************
+* def Name = "Suseela"
+* def Age = 19
+* def Spouse = 'Jack'
+
+More details refer: Ex-Variable.feature
+
+JSONArray and JSONObject
+**************************
+1. JSONArray is start from []
+2. JSONArray should contains JSONObject
+
+1. JSONObject is start from {}
+2. JSONObject contains key and value pair
+
+Ex: JOSNArray:
+[
+	{
+	"Name": "Suseela",
+	"Age": 19
+	}
+]
+
+Ex: JSONObject
+{
+	"Name": "Suseela",
+	"Age": 19
+}
+
+More details refer: Ex-Variable.feature
+
+-----------------------------------------------------------------------------------------------------------------
+JSON IMPORTANT CONCEPT
+=========================
+Two way we can keep json file in karate api testing
+Way 1: Creating json in feature file itself
+Way 2: Creating json file and read the json file to access
+
+Ex: Way 1:
+Feature: Json File Import Example
+  Scenario: Example of Json File in feature file itself
+    * def JsonObject =
+    """
+    {
+      "Name": "Suseela",
+      "Age": 19
+    }
+    """
+    * print JsonObject.Name
+    * print JsonObject.Age
+	
+Way 2: 
+
+By default , karate expecting user to create json file in same folder where we have *.feature file. See below example
+Basic Concept --> Folder
+ Ex-Variable.feature
+ Variable.json
+
+In such case, can we access json file directly by providing name of json
+* def JsonFile = read('Variable.json')
+(or)
+* def JsonFile = read('Variable.json')
+
+Another way if we wanna keep json file in different folder use classpath and carry over the path where your file is present
+classpath refer root folder which is nothing but considering till java folder see example below
+
+src
+ test
+  Java
+   BasicApiEx
+     ex-variable.feature
+	 variable.json
+   SupportJsonFile
+     variableA.json
+	 
+in such case till java folder classpath will findout after that navigate through your json file path
+
+* def JsonFile = read('classpath:SupportJsonFile/variableA.json')
+(or)
+* def JsonFile = read("classpath:SupportJsonFile/variableA.json")
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+IMPORTANT LOGICS
+******************
+Api request is dividing into two important path
+1) First one is base url
+	Ex: petstore.swagger.io/v2 
+2) Second one is End point
+	Ex: [post] /pet/{petId}/uploadImage
+	    [get] pet/findByStatus?status=pending
+			   
+Two type of parameter:
+1. Path parameter (if any url before the ? called as path parameter)
+2. Query parameter (if any url start after the ? called as query parameter)
+
+
+Different type of http methods
+==============================
+GET- Get method is used to retrive data from database
+POST - Post method is used to create data into database
+PUT - Put method is used to update data into database
+PATCH - Patch method is used to update data into database
+[ Put and patch method both are used to update data into database but different is using patch 
+partial data updated in the entire resource. but using put partial data updates not possible the entire resource]
+DELETE - Delete method is used to delete data from the database
+
+
+Different type of Response 
+===========================
+After triggered API request, we need to check response of api, karate support different keyword to get reponses(response code , body, etc)
+
+responseStatus: responseStatus is used to get response status code Ex: 200, 400, Etc.,
+reponse: response is used to get reponse body , body will be json format.
+reponseTime: responseTime is used to get how much time taken for execution. timeformat is millisecond
+responseType: responseType is used to get type of reponsebody. type of reponsebody is available json, xml and string
+responseHeaders['any-header-name']: reponseHeaders is used to get name of speacified header.
+
+Ex:
+Feature: Get API example
+  Scenario: Sample get api
+    Given url 'https://petstore.swagger.io/v2'
+    And path '/pet/findByStatus?status=pending'
+    And method GET
+    * print response
+    * print responseStatus
+    * print responseTime
+    * print responseType
+    * print responseHeaders['Content-Type']
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+Different Way to set header
+============================
+used to transfer metadata about the request and the desired response
+Way 1: AnyGherkinKey header header-name = header-value
+-------------------------------------------------------
+Note: header value is integer dont use any quotes other than integer use single quotes or doubt quotes
+
+Ex: 
+    Given header Content-Type = 'application/json'
+    When header Connection = 'keep-alive'
+	
+	
+Way 2: Create one variable with all header name and header value as json format and call that variable using headers key
+--------------------------------------------------------------------------------------
+Create variable with all header
+* def required_header = {Content-Type: 'application/json', Connection: 'keep-alive'}
+
+
+Call variable with headers
+GherkingKey headers variablename
+Ex: Given headers required_header
+
+
+Way 3: configure header and header value using headers key
+-------------------------------------------------------------
+Ex:  * configure headers = {Content-Type: 'application/json', Connection: 'keep-alive'}  (or)
+* configure headers = {"Content-Type":"application/json", "Connection":"keep-alive"}  --highly recommended
+
+
+Way 4: Create js file with all header name and header value and call that file
+------------------------------------------------------
+Create js file
+function headers() {
+
+ var headers = {};                            -- declaring empty string to store  header-name and header-value
+ headers['Accept'] = 'application/json';      -- Assigning header-name and header-value in json format
+ headers['Connection'] = "Keep-Alive";        -- {"Content-Type":"application/json", "Connection":"keep-alive"}  
+ karate.log(headers);                         
+
+ return headers                               -- returning this value
+
+}
+
+
+How to call
+* configure headers = read('classpath:headers.js')
+
+------------------------------------------------------------------------------------------------------------------------------------------
+IMPORTANT CONCEPT
+===================
+
+GET  https://qua.tda.dev.aws.renault.com/api/v1/technical-definitions/{tdCode}/lines/{lineNumber}
+/working-part-revisions/{partRevisionLevel}?requestedBy=z027311
+
+
+BaseUrl: https://qua.tda.dev.aws.renault.com/
+EndPoint: api/v1/technical-definitions/{tdCode}/lines/{lineNumber}/working-part-revisions/{partRevisionLevel}?requestedBy={requestedid}
+
+ ==> Path Parameter: api/v1/technical-definitions/{tdCode}/lines/{lineNumber}/working-part-revisions/{partRevisionLevel}
+ ==> Query Parameter: requestedBy={requestedid}
+     [Query parameter always search criteria and filter criteria]
+ ==> Parameter value to pass: {tdCode}, {lineNumber}, {partRevisionLevel}, {requestedid}
+	 [Different way we can pass parameter value]
+	 
+[Note: 
+1. End point may have path parameter or combination of path and query parameter.
+   alone query parameter is not possible]
+   
+   ]
+
+	 
+Method: GET/POST,ETC.,
+Request Body:
+{
+  "code": 0,
+  "type": "string",
+  "message": "string"
+}
+
+ReponseCode: 401
+ResponseBody:
+	{
+  "errors": [
+    {
+      "errorCode": 401,
+      "errorMessage": "Missing Bearer token",
+      "errorLevel": "error",
+      "errorType": "technical",
+      "documentationUrl": null,
+      "tips": null
+    }
+	]
+	}
+
+ReponseCode: 401
+Response headers:
+ content-length: 149 
+ content-type: application/json 
+ date: Wed,11 Jan 2023 11:12:50 GMT 
+ vary: Origin,Access-Control-Request-Method,Access-Control-Request-Headers 
+ x-content-type-options: nosniff 
+ x-frame-options: DENY 
+ x-xss-protection: 1; mode=block 
+ 
+ResponseTime:
+ResponseType:Json
+
+INPOINT OF KARATE CONCEPT
+=========================
+BaseUrl is consider in karate point is ==> url 'baseurlline'
+Path parameter is consider in karate point is ==> path 'pathparameterline'
+Query parameter is consider in karate point is ==> param search-criteria-name = parameter-value
+parameter value in karate point is ==> different way to specify
+Get/post/etc., is consider in karate point is ==> method GET
+RequestBoy is consider in karate point is ==> request 
+
+Ex: BaseUrl Example
+-------------------
+Way 1: BaseUrl with Ghergin keyword - Highli recommonded
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    Given url 'https://petstore.swagger.io/v2' ==> doubt quotes also supported
+	
+Way 2: BaseUrl with *
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    * url 'https://petstore.swagger.io/v2' ==> doubt quotes also supported
+	
+Way 3: Declaring BaseUrl in vairable and call
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    * def baseurl = 'https://petstore.swagger.io/v2' ==> doubt quotes also supported
+    Given url baseurl (or)
+	* url baseurl
+	
+Way 4: BaseUrl with concatenate
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    * def HostName = 'petstore.swagger.io'
+    * url 'https://' + HostName + '/v2'  (or) ==> doubt quotes also supported
+	Given url 'https://' + HostName + '/v2'
+	
+	
+NOT POSSIBLE CASE 1:
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    * def HostName = 'petstore.swagger.io'
+    Given url 'https://', HostName , '/v2'  ==> Error
+
+     or 
+    Given url 'https://'<HostName>'/v2'  ==> Error
+
+	
+Ex: Path Parameter Example
+--------------------------
+Way 1: Path parameter with Ghergin Keyword
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    * url 'https://petstore.swagger.io/v2'  ==> doubt quotes also supported
+    Given path '/pet/12'
+	
+Way 2: Path parameter with *
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    * url 'https://petstore.swagger.io/v2' ==> doubt quotes also supported
+    * path '/pet/12'
+	
+Way 3: Declaring path parameter(complete path) in variable and call
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    * def pathPara = '/pet/12'
+    * url 'https://petstore.swagger.io/v2' ==> doubt quotes also supported
+    * path pathPara (or)
+	Given path pathPara
+	
+Way 4: In path parameter most of time we need to pass parameters value
+We have n number way to pass parameter value in path parameter.. will see example later
+
+Ex: Query Parameter Example
+-----------------------------
+Way 1:  Query parameter with ghergin keyword
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/pet/findByStatus'
+    And param status = 'pending'    ==> doubt quotes also supported
+	
+Way 2: Query parameter with *
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/pet/findByStatus'
+    * param status = 'pending'  ==> doubt quotes also supported
+
+Way 3: Declaring query parameter(complete path) in variable and call is not possible
+
+Way 4: In query parameter most of time we need to pass parameters value
+We have n number way to pass parameter value in query parameter.. will see example later
+
+
+Ex: Parameter Value
+--------------------
+Parameter value with path parameter
+************************************
+/pet/{petID}
+
+Different way we can pass petID parameter value
+
+Way 1: Directly specify the value in path parameter
+Feature: Sample path parameter example
+  Scenario: Sample scenarios path parameter
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/pet/12'
+	
+
+Way 2: Declare parameter value in variable and call
+
+2A)
+Feature: Sample path parameter example
+Scenario: Sample scenarios path parameter
+* def petIDValue = 12
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/',petIDValue
+
+
+2B) 
+Feature: Sample path parameter example
+Scenario: Sample scenarios path parameter
+* def petIDValue = 12
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/' + petIDValue
+
+Way 3: Pass parameter value using example key
+
+3A)
+Feature: Sample path parameter example
+Scenario Outline: Sample scenarios path parameter
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/' + <petIDValue>
+
+Examples:
+| petIDValue |
+|      12   |
+
+
+3B)
+Feature: Sample path parameter example
+Scenario Outline: Sample scenarios path parameter
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/',<petIDValue>
+	
+Examples:
+| petIDValue |
+|      12   |
+
+
+3C)
+Feature: Sample path parameter example
+Scenario Outline: Sample scenarios path parameter
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/<petIDValue>'	
+	
+Examples:
+| petIDValue |
+|      12   |
+
+
+
+Parameter value with query parameter
+************************************	
+
+?status=parameter-value
+
+Way 1: Directly we can specify the parameter value
+
+Feature: Sample path parameter example
+Scenario: Sample scenarios path parameter
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/findByStatus'
+And param status = 'available'   ==> double quotes also supported
+
+
+Way 2: Declare parameter value and call
+Feature: Sample path parameter example
+Scenario: Sample scenarios path parameter
+* def statusValue = "available"
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/findByStatus'
+And param status = statusValue
+
+
+Way 3: Pass parameter value using example keyword
+Feature: Sample path parameter example
+Scenario Outline: Sample scenarios path parameter
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/findByStatus'
+And param status = <statusValue>
+
+Examples:
+  | statusValue |
+  | "available" |
+  
+
+
+Ex: method
+-----------
+Way 1: Using method with gherkin keyword
+
+Feature: Sample path parameter example
+Scenario: Sample scenarios path parameter
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/findByStatus'
+And param status = "available"
+And method GET
+
+Way 2: Using method with * 
+
+Feature: Sample path parameter example
+Scenario: Sample scenarios path parameter
+Given url 'https://petstore.swagger.io/v2'
+When path '/pet/findByStatus'
+And param status = "available"
+* method GET
+
+
+Ex: Request Body(Request) Example
+==================================
+[Requestbody always json format(key and value pair)]
+Way 1: Directly we can specify request body
+ Given url "https://petstore.swagger.io/v2"
+ When path "/user"
+ And request { "id": 101,"username": "KKSUser","firstName":"Suseela"}
+
+
+1A)
+ * def userid = 2007
+ * def User_name = "KKSsUS"
+ Given url "https://petstore.swagger.io/v2"
+ When path "/user"
+ And request { "id": #(userid),"username": #(User_name),"firstName":"Suseela"}
+
+And request { "id": "#(userid)","username": "#(User_name)","firstName":"Suseela"} ==> It will work but better to avoid
+because declaration iteself we are defining the value as integer and string ex: user_id = 2007, user_name = "KKSsUS"
+
+
+1B)
+    Given url "https://petstore.swagger.io/v2"
+    When path "/user"
+    And request { "id": <userid>,"username": <User_name>,"firstName":<name>}
+
+    Examples:
+    | userid|User_name | name |
+    | 2007 |KKSsUS| Suseela |
+
+
+1C)
+  Scenario Outline: Header Scenario
+    * def JsonValue = {userid: 2010, User_name : "KKSsUS"}  ==> All variable in json format
+    Given url "https://petstore.swagger.io/v2"
+    When path "/user"
+    And request { "id": #(JsonValue.userid),"username": #(JsonValue.User_name),"firstName": "<FName>"}
+
+
+    Examples:
+    | FName|
+    | FN03 |
+	
+
+Way 2: Store json format request body as variable and call
+* def details  =
+ """
+    {
+    "id": 2002,
+    "username": "UN02",
+    "firstName": "FN02",
+    "lastName": "LN02",
+    "email": "E02",
+    "password": "P02",
+    "phone": "PH02",
+    "userStatus": 1
+    }
+ """
+ Given url "https://petstore.swagger.io/v2"
+ When path "/user"
+ And request details
+ 
+Way 3:
+Feature: Header feature
+  Scenario Outline: Header Scenario
+    * def details  =
+    """
+    {
+    "id": <Uid>,
+    "username": <UName>,    
+    "firstName": <FName>,
+    "lastName": <LName>,
+    "email": <UEmail>,
+    "password": <Pwd>,
+    "phone": <PhNo>,
+    "userStatus": <MyState>
+    }
+    """
+    Given url "https://petstore.swagger.io/v2"
+    When path "/user"
+    And request details
+
+    Examples:
+    |Uid| UName| FName|LName | UEmail |Pwd |PhNo|MyState|
+    |2003|"US03" | "FN03" |"LN03"| "UE03" | "Pwd03" | "9000" | 1 |
+
+(or)
+   Examples:
+    |Uid| UName| FName|LName | UEmail |Pwd |PhNo|MyState|
+    |2003| US03 | FN03 |LN03| UE03 | Pwd03 | 9000 | 1 |     ==> string value is stored as string and int value stored as int
+
+
+Feature: Header feature   ===> Better to avoid "".. default integer value also consider as string. so dont user
+this method
+  Scenario Outline: Header Scenario
+    * def details  =
+    """
+    {
+    "id": <Uid>,  ==> integer so not used quotes
+    "username": "<UName>", ==> string so used quotes
+    "firstName": "<FName>",
+    "lastName": "<LName>",
+    "email": "<UEmail>",
+    "password": "<Pwd>",
+    "phone": "<PhNo>",
+    "userStatus": <MyState>
+    }
+    """
+    Given url "https://petstore.swagger.io/v2"
+    When path "/user"
+    And request details
+	
+    Examples:
+    |Uid| UName| FName|LName | UEmail |Pwd |PhNo|MyState|
+    |2003|US03 | FN03 |LN03| UE03 | Pwd03| 9000 | 1 |      ==> declared quotes in details variable so not using here
+	
+Way 3: Store json value into variable and specify in jsonvariable
+Feature: Header feature
+  Scenario Outline: Header Scenario
+    * configure headers = read('classpath:/BasicConcept/headers.js')
+    * def userid = 2005      ==> integer declaration
+    * def User_name = "KKSsUS" ==> String declaration
+    * def details  =
+    """
+    {
+    "id": #(userid),  ==> Call variable here using #()
+    "username": #(User_name),
+    "firstName": <FName>,
+    "lastName": <LName>,
+    "email": <UEmail>,
+    "password": <Pwd>,
+    "phone": <PhNo>,
+    "userStatus": <MyState>
+    }
+    """
+    Given url "https://petstore.swagger.io/v2"
+    When path "/user"
+    And request details
+
+    Examples:
+    | FName|LName | UEmail |Pwd |PhNo|MyState|
+    | FN03 |LN03| UE03 | Pwd03| 9000 | 1 |
+
+
+
+Ex: reponsebody(response) example
+===================================
+
+How to get response body
+*************************
+
+Given url 'https://petstore.swagger.io/v2/'
+When path '/pet/findByStatus'
+And param status = 'pending'
+And method GET
+
+* print response
+* print response[0]  ==> If it JSONArray 
+
+
+Note: direct print with $ cannot be used. we can store into variable and print is possible
+
+* print response is replaced with following code
+
+* def responseValue = $
+* print responseValue
+
+
+* def responseValue = $[0]
+* print responseValue
+
+
+How to get response value
+**************************
+$ represents the response
+
+PRINT RESPONSE VALUE:
+--------------------
+Feature: Response Feature
+  Scenario: Sample scenarios example
+    Given url 'https://petstore.swagger.io/v2/'
+    When path 'pet/1001'
+    And method GET
+    * print response.message
+	
+	
+	* print $.message ==> ERROR- direct print with $ cannot be used. we can store into variable and print is possible
+	
+	* def resonseValue = $.message
+	* print resonseValue
+
+
+STORE RESPONSE VALUE:
+----------------------
+
+* def ResponseValue = response.Name
+(or)
+* def responseValue = $.Name
+
+
+* def ResponseValue = response[0].Name
+(or)
+* def responseValue = $[0].Name
+
+============================================================================================================
+
+ASSERT IN KARATE API
+*********************
+Assert check condition is true.. if it false it through on error
+
+Syntax: GherginKey assert condition  (or) * assert condition
+
+Ex: 
+* def myNo = 3
+Given assert myNo == 3  
+
+* def myNo = 5
+Given assert myNo >= 3  ==> Error
+
+* def myNo = 500
+* assert myNo == 5000
+
+Any condition you can add as per your requirement
+
+MATCH IN KARATE API
+*******************
+match check condition is true.. if it false it through on error
+
+Syntax: GherginKey match condition (or) * match condition
+
+Condition should be == or != other than this we cannot use anything
+Ex:
+* def Name = "Suseela"
+* match Name == "Suseela"
+	
+(or)
+
+* def age = 100
+* match age  !=  1000	
+	
+match == 
+is used to compare two string or number or jsons are equal
+
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+    'name': 'Suseela'
+    }
+    """
+    * match name == { 'name':'Suseela'}
+	
+Ex1:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name = 'Suseela'
+    * match name == 'Suseela'
+	
+Ex2:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name = 1
+    * match name == 1
+
+
+
+match ! = 
+it is opposite of match ==, used to check two string, number or jsons are not matching
+
+Ex:-
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name = 7
+    * match name != 1
+
+
+
+match contain
+is used to check partial string or json value. but not supproted number
+
+
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name = 'suseela'
+    * match name contains 'la'  ==> Passed
+	
+	
+Ex1:
+Feature: Feature Example
+  Scenario: Scenario Example   ==> ERROR number is not supported
+    * def name = 134
+    * match name contains 1   
+
+
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38
+    }
+    """
+    * match name contains {'name': 'Suseela'} ==> Passed
+	
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38
+    }
+    """
+    * match name contains {'name': 'Susla'}  ==> Error, because value is not matching
+	in terms of match contains with json multiple key and value pair exists if provide
+	anyone key and value with correct data will pass else faile here. 
+	
+match contains only
+is it used to compare two json files all json value or array ([1,2,3]) should present but order is not consider
+
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38
+    }
+    """
+    * match name contains only {'Age': 38, 'name': 'Suseela'}  ==> Passed but order is not consider
+
+
+Ex1:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38
+    }
+    """
+    * match name contains only {'name': 'Suseela'}  ==>Error Age json vlue is not present
+
+match contain any
+json have mulple key and value pair and any one should present separately (or) any one is present along with other json 
+
+
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38
+    }
+    """
+    * match name contains any {'Age': 38}  ==> Passed
+	
+EX:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38
+    }
+    """
+    * match name contains any {'Work':'WHF', 'Age': 38 }  ==> PASSED Even work is not present in name 
+
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38
+    }
+    """
+    * match name contains any {'Work':'WHF', 'AgES': 38 }   ==> ERROR Any one should present but these case not 
+
+
+match contains deep
+Same like match contains, exection exceed if any one matches but if multiple trees present contains wont work
+for this we have use deep
+
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38,
+       'Habbies':['Cricket', 'TVShow', 'Game']
+    }
+    """
+    * match name contains deep {'Habbies':'Cricket'}
+	(or)
+	* match name contains deep {'Habbies':['Cricket']}
+
+
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def name =
+    """
+    {
+       'name': 'Suseela',
+       'Age': 38,
+       'Family':[{
+                'Father-Name': 'KKS',
+                'Mother-Name': 'MKS'
+                }]
+    }
+    """
+    * match name contains deep { 'name': 'Suseela', 'Family':{'Father-Name': 'KKS'}}
+	(or)
+	* match name contains deep { 'name': 'Suseela', 'Family':[{'Father-Name': 'KKS'}]}
+	
+match !contains  ==> confused.. ignoring
+1. Scenarios pass when
+  1A) number of parameter is not matched
+  2B) number of paramter is matched but key or value pair is not matched
+  else failed
+  
+1A) 
+  Scenario: Scenario Example
+    * def json_val =
+    """
+    { 'name': 'Suseela', 'Age': 38 }
+    """
+    * match json_val !contains  { 'name': 'Suseela' }  ==> parameter is not matched so consider is not contains
+	
+2B) 
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def json_val =
+    """
+    { 'name': 'Suseela', 'Age': 38 }
+    """
+    * match json_val !contains  { 'name': 'Suela', 'Age': 38 }  ==> parameter is matching but value is not matching
+	
+Else
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def json_val =
+    """
+    { 'name': 'Suseela', 'Age': 38 }
+    """
+    * match json_val !contains  { 'name': 'Suseela', 'Age': 38 }
+	
+Failed because exactly json value is matching but our keyword is not contains. here value is matching so scenarios is failed
+
+
+match header
+Ex:
+Feature: Feature Example
+  Scenario: Scenario Example
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/pet/1011'
+    And method GET
+    * match header Content-Type == 'application/json'
+	
+
+CONCATENATE EXAMPLE IN API
+***************************
+WAY 1: Using +
+* def myNo = 500
+Given print 'Suseesla:' + myNo
+
+* def name = "sus"
+* def age = 20
+* print 'My name is ' + name + ' and age is' + age
+
+WAY 2: Using ,
+* def myNo = 500
+Given print 'Suseesla:', myNo
+
+ * def name = "sus"
+ * def age = 20
+ * print 'My name is ', name , ' and age is', age
+
+SET EX IN KARATE API
+=====================
+set is used to create json operation or update json operation
+
+Create JSON operation
+**********************
+  1) simply add key and value pair
+  2) Create jsonobject 
+  3) Create jsonArray without jsonobject
+  4) create jsonArray with jsonobject
+  
+1) Example
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+     {
+     'name':'Kanniyappan'
+     }
+     """
+    * set setExJson.age = 12
+    * print setExJson
+
+Output:
+{
+  "name": "Kanniyappan",
+  "age": 12
+}
+
+2) Example
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+     {
+     'name':'Kanniyappan'
+     }
+     """
+    * set setExJson.Personal = {'Age': 29, 'Gender':'Male'}
+    * print setExJson
+	
+Output:
+{
+  "name": "Kanniyappan",
+  "Personal": {
+    "Age": 29,
+    "Gender": "Male"
+  }
+}
+
+3) Example
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+     {
+     'name':'Kanniyappan'
+     }
+     """
+    * set setExJson.Personal[0] = 1
+    * set setExJson.Personal[1] = 5
+    * print setExJson
+	
+Output:
+{
+  "name": "Kanniyappan",
+  "Personal": [1,5]
+}
+
+4) Example
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+     {
+     'name':'Kanniyappan'
+     }
+     """
+    * set setExJson.Personal[0] = {'Age': 29, 'Gender':'Male'}
+    * set setExJson.Personal[1] = {'Occupation': 'working'}
+    * print setExJson
+	
+Output:
+{
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+}
+
+Update JSON Operation
+**********************
+Example 1:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+  {
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+  }
+     """
+
+    * set setExJson.name = 'Kumutha'
+    * print setExJson
+	
+Output:
+{
+  "name": "Kumutha",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+}
+	
+Example 2:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+  {
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+  }
+     """
+
+    * set setExJson.Personal[0] = {"Age": 59,"Gender": "Female"}
+    * print setExJson
+	
+Output:
+{
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 59,
+      "Gender": "Female"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+}
+
+Example 3:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+  {
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+  }
+     """
+
+    * set setExJson.Personal[0].Age = 120
+    * print setExJson
+
+
+Output:
+{
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 120,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+}
+
+Example 4:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+  {
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+  }
+     """
+
+    * set setExJson.Personal[1] = {"Occupation": "Not - working"}
+    * print setExJson
+
+Output:
+{
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "Not - working"
+    }
+  ]
+}
+
+
+REMOVE EXAMPLE IN KARATE API
+===============================	
+* remove is used to remove json operation
+
+Example 1:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+  {
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+  }
+     """
+
+    * remove setExJson.name
+    * print setExJson
+	
+Output:
+{
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+}
+
+Example 2:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+  {
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+  }
+     """
+
+    * remove setExJson.Personal[0]
+    * print setExJson
+
+Output:
+{
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Occupation": "working"
+    }
+  ]
+}
+ 
+ 
+Example 3:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def setExJson =
+     """
+  {
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Age": 29,
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+  }
+     """
+
+    * remove setExJson.Personal[0].Age
+    * print setExJson
+
+
+Output:
+ {
+  "name": "Kanniyappan",
+  "Personal": [
+    {
+      "Gender": "Male"
+    },
+    {
+      "Occupation": "working"
+    }
+  ]
+}
+
+REPLACE TEXT VALUE IN API
+**************************
+Replacing one value to another
+
+WAY 1:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def text = 'hello <one> world'
+    * replace text.one = 'suseela'
+    * print text  ==> hello suseela world
+	
+WAY 2:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def jsonVAL =
+     """
+     {'name':'Nithya'}
+     """
+    * def text = 'hello <one> world'
+    * replace text.one = jsonVAL.name
+    * print text
+	
+WAY 3: More than one value means follow below ways
+Note: |token|value| cannot be changed
+
+Feature: Header feature
+  Scenario: Header Scenario
+    * def text = 'hello <one> world <two>'
+    * replace text
+    | token | value |
+    | one| "Suseela" |
+    | two | "Good" |
+    * print text
+
+WAY 4:
+Feature: Header feature
+  Scenario: Header Scenario
+    * def jsonVAL =
+     """
+     {
+     'name':'Nithya',
+     'SurName' : 'Food'
+     }
+     """
+    * def text = 'hello <one> world <two>'
+    * replace text
+    | token | value |
+    | one| jsonVAL.name |
+    | two | jsonVAL.SurName|
+    * print text
+
+PARAM EXAMPLE IN KARATE API
+===========================
+In point of query parameter when need to pass multiple value instead of using param we can go for params 
+in params value will be specified in single lineNumber
+
+Param
+*****
+Feature: Sample params feature
+  Scenario: Sample params scenarios
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/user/login'
+    And param username = 'us1001'
+    And param password = 'pw1001'
+    And method GET
+    * print response
+
+Params
+******
+Feature: Sample params feature
+  Scenario: Sample params scenarios
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/user/login'
+    And params {'username':'us1001', 'password':'pw1001'}  ==> Query parameter specified in single line
+    And method GET
+    * print response
+
+
+Note: Sample all data driven concept, variable concept , same like param all are possible
+
+
+TEXT EXAMPLE IN KARATE API
+==========================
+text is sample like def , to store something. but we cannot declare sequence character, sql query in def which has possible in text
+In def we can store json, functions, etc., but not a text value
+
+Ex: 1
+Feature: Sample text feature
+  Scenario: Sample text scenarios
+    * text textval =                          ==> we cannot specify def here because storing normal string
+    """
+    My name is Suseela
+    """
+    * print textval
+
+Ex 2: text with parameter is possible
+Feature: Feature Example
+  * text textvalue =
+  """
+   SELECT * FROM  <tableName>
+  """
+  Scenario Outline: Scenarios Example
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/user/'
+    And request textvalue
+    And method GET
+
+    Examples:
+    | tableName |
+    | tbl001_table     |
+    | tbl002_table     |
+
+TABLE EXAMPLE IN KARATE API
+==========================
+Table is replacement for json. but avoid using this, because when matching response with table always fails
+because table output will be [{name: 'Bob', age: 2}] but response will be {name: 'Bob', age: 2}, [] is missing
+
+CALL EXAMPLE IN KARATE API
+==========================
+call keyword is used to call some files it may feature file, java, javascript, etc,
+To call files we need to use file path, for this case read is used
+
+
+call one feature file to another feature file
+*********************************************
+
+WAY 1: sample.feature calling another feature file
+Feature: Sample feature
+  Scenario: Sample Scenarios
+    * call read('classpath:BasicConcept/Ex-Basics.feature')   
+	
+==> all scenarios which is present in the Ex-bascis feature file will be executed
+
+WAY 2:
+Feature: Sample feature
+  Scenario: Sample Scenarios
+    * def callfeature = read('classpath:BasicConcept/Ex-Basics.feature')
+    * call callfeature
+
+Note: classpath is by default refer till java folder, after that you can specify your path
+
+
+IMPORTANT LOGIC:
+One feature file may have multiple scenarios, we calling feature file from others, all the scenarios will
+be executed, but i dont want to execute all the scenarios only specific scenarios need to be execute
+means, we need to use tags
+
+
+Ex:
+Ex-Basics.feature file
+Feature: sample feature Basics
+
+  @tag1
+  Scenario: sample scenarios basics
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/pet/1011'
+    And method GET
+    * print response
+
+  @tag2
+  Scenario Outline: sample scenarios basicsA
+    Given url 'https://petstore.swagger.io/v2'
+    When path '/pet/<pedid>'
+    And method GET
+    * print response
+
+    Examples:
+    | pedid |
+    | 123   |
+    |1234   |
+
+
+Call feature
+
+Feature: Sample feature
+  Scenario: Sample Scenarios
+    * def callfeature = read('classpath:BasicConcept/Ex-Basics.feature@tag1')
+    * call callfeature
+
+(or)
+* call read('classpath:BasicConcept/Ex-Basics.feature@tag1')
+
+
+
+call java script function
+**************************
+Way 1:
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def ex_javascript =
+    """
+    function (a, b)
+    {
+     var sum = a + b
+     return sum
+    }
+    """
+   * karate.log(ex_javascript(2,3))
+   
+
+Way 2: Without return type
+addition.js
+function(a, b)
+{
+ sum = a + b
+ print(sum)
+}
+
+
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def java_value = read('classpath:BasicConcept/addition.js')(2,3)
+	
+output: 5
+
+Way 3: With return type
+addition.js
+function(a, b)
+{
+ sum = a + b
+ return sum
+}
+
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def java_value = read('classpath:BasicConcept/addition.js')
+    * print java_value(2,3)
+	
+
+(or)
+
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def java_value = read('classpath:BasicConcept/addition.js')
+    * karate.log(java_value(2,3))
+
+
+call java function
+==================
+How to create java class
+file -> javaclass -> type name and press enter
+
+javacode without parameter without returntype
+----------------------------------------------
+ex:
+package BasicConcept;
+
+public class subtraction {
+    public void two_subtraction()
+    {
+        int a = 10;
+        int b = 20;
+        System.out.print(a+b);
+    }
+}
+
+call java
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def javademo = Java.type('BasicConcept.subtraction')   ==> Java should be caps and path we should not use / instead / use .
+    * def obj = new javademo().two_subtraction()
+
+Note: No need to use java extenstion
+
+
+javacode without parameter with returntype
+------------------------------------------
+package BasicConcept;
+
+public class subtraction {
+    public int two_subtraction()
+    {
+        int a = 10;
+        int b = 20;
+        return  a + b;
+    }
+}
+
+
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def javademo = Java.type('BasicConcept.subtraction') ==> load the java class.
+    * def obj = new javademo().two_subtraction()    ==> return value will be stored in obj
+    * print obj
+	
+
+javacode with parameter without returntype
+--------------------------------------------
+package BasicConcept;
+
+public class subtraction {
+    public void two_subtraction(int a, int b)
+    {
+        System.out.print(a+b);
+    }
+}
+
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def javademo = Java.type('BasicConcept.subtraction')
+    * def obj = new javademo().two_subtraction(10, 30)
+	
+
+
+javacode with parameter with returntype
+----------------------------------------------
+package BasicConcept;
+
+public class subtraction {
+    public int two_subtraction(int a, int b)
+    {
+        return a+b;
+    }
+}
+
+
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def javademo = Java.type('BasicConcept.subtraction')
+    * def obj = new javademo().two_subtraction(10, 30)
+    * print obj
+	
+
+Java with static method example
+---------------------------------
+package BasicConcept;
+
+public class subtraction {
+    public static int two_static_subtraction(int a, int b)
+    {
+        return a+b;
+    }
+}
+
+Feature: Feature Example
+  Scenario: Scenario Example
+    * def javademo = Java.type('BasicConcept.subtraction') 
+    * def obj = javademo.two_static_subtraction(10, 30)   ==> not creating object here.. directly accessing with class
+    * print obj
+
+
+Note:    
+* def obj = new javademo().two_subtraction(10, 30) ==> see different  * def obj = javademo.two_static_subtraction(10, 30)   
+
+
+
+condition loop
+--------------
+condition ? truecondition : falsecondition
+
+
+https://gorest.co.in/
+https://petstore.swagger.io/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
