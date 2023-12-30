@@ -1,0 +1,359 @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+PRECONIDTION PROCESS - LOCAL
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Install intellij:
+=================
+Download and install intellij (intellij idea community edition)
+https://www.jetbrains.com/idea/download
+
+
+Install JDK and Environment Variable Setup:
+===========================================
+1. JDK should be installed in your machine. karate and gatling support only jdk not for jre
+2. Set environment system variable
+2A) JAVA_HOME: C:\Program Files\Java\jdk1.8.0_351
+2B) set javapath inside path : C:\Program Files\Java\jdk1.8.0_351\bin
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+PROJECT CLONE AND INSTALLATION PROCESS - LOCAL
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Clone Process:
+==============
+1) Create any folder (learning-api-automation) and clone your project from the folder
+[Note: Make sure that, path should not have any space for sync otherwise error must throw
+Ex: C:\Users\z027311\OneDrive - Alliance\Suseela --> Error 
+
+2) Change rootProject.name in settings.gradle file 
+project name will be what folder name, have you used for clone Ex: (learning-api-automation)
+
+Installation Process:
+=====================
+Automatically gradle project will be downloaded and installed. Disconnect your VPN to build process if you are
+facing any issue
+
+Note: How to solve connect timeout error : 
+Go to file --> settings --> Under appearance & behaviour click System setting --> under HTTP Proxy click --> Select 
+no proxy radiobutton --> apply and save it
+
+If your facing any proxy error
+Required to set proxy in intellij
+Go to file --> settings --> Under appearance & behaviour click System setting --> under HTTP Proxy click 
+--> Select manual proxy configuration --> fill below required details
+Host Name: 10.246.3.249
+Post Number: 3128
+Login: z027311
+Password: window login password
+click on check connection 
+Enter: https://google.com
+
+after that automatomatically gradle project will be downloaded and installed
+if not, go to build --> build project --> project will be build
+
+
+Note:
+If you are facing any instalation failed
+Step 1: delete .gradle and .idea file from intellij
+Step 2: Go to file --> Invalide cache --> click all checkbox --> Click on Invalided and restart button
+Step 3: Delete .grale file from C:\Users\z027311 location
+
+if you are not able to delete the folder
+Go to run --> type resmon.exe --> Select CPU --> type searchind folder or file name in associated haldes and 
+search --> end the process by right click --> now delete the folder or file
+
+
+** NOTE: Your feature file should contain inside com folder (or) Create anyfolder inside com folder and
+write your script inside newly created folder
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+KARATE API AUTOMATION STEP BY STEP CODEING - LOCAL
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+IMPORTANT
+=========
+Token will be generated and that token will be used to header for authorization by using bearer or basic depends
+on your project
+by specifying token into header is the only way to authentication for api automation
+karate-config.js file will be executed before all files --> remember
+
+STEP 1: (AAuthentication.feature, Akarate-config.js, headers.js)
+======
+	Token generation for authentication. Refer authentication process notes for more details
+	1) Create feature file and specify all required details
+	2) Run the file and check whether token is generating or not
+	
+Feature: Generate token for authentication feature
+  Scenario: Generate token for authentication
+    Given url 'https://idp2.renault.com/nidp/oauth/nam/token'
+    And form field grant_type = 'password'
+    And form field client_id = 'd71492b0-4577-45a3-bc82-cacbca047069'
+    And form field client_secret = '840BiIsXEARqFEcW2V-arW20Qsdyv2v5Aw7HaH1NrgyTLV7N0ZW-7yjAVyJOGJpO4y2p1zOfbEXnIxU8p-wlcw'
+    And form field username = 'awboy01'
+    And form field password = 'TECHaw01'
+    And form field scope = 'arca'
+    And method POST
+    Then status 200
+    * def access_token = response.access_token
+    * print '[AUTHENTICATION TOKEN]' , access_token
+	
+STEP 2:
+=======
+Generated token should be specified in header file for authentication. if we want to specify header
+file means , this token will be specify globally. if you sepcify variable in karate-config.js like
+config.name = "Suseela", This is name variable can be used anywhere. Example * print name (or)
+karate.get('name') in any feature file
+
+	How to specify globally by using karate-config.js by using config key
+	1) To call this feature file into karate-config file, to get token and to be configured into globally
+ 
+function fn() {
+    var config = {};
+    var auth = karate.callSingle('classpath:com/Auth/Authentication.feature')
+    config.access_token = auth.access_token
+
+    return config;
+}
+
+STEP 3:
+======
+	1) Gloablly configred token will be used for header for authorization
+	
+headers['Authorization'] = 'Bearer ' + karate.get('access_token');
+
+
+STEP 4: 
+=======
+	1) Use this header file into feature file for authorization process
+	* configure headers = read('classpath:headers.js')
+	
+Feature: Authentication feature
+  Background:
+    * url 'https://qua.tda.dev.aws.renault.com/'
+    * configure headers = read('classpath:headers.js')
+
+  Scenario: Authentication scenario
+    Then path '/api/v1/users/me'
+    And method GET
+    * print response
+	
+******************************************************************************************************************
+Removing hardcoded value from authentication feature file
+=========================================================
+(BAuthentication.feature, Bkarate-config.js, headers.js)
+
+STEP 1:
+==> Specify hardcoded athentication feature file value into karate-config file variable and 
+use this variable into feature file
+
+Ex:
+Initial Feature File : And form field username = 'awboy01'
+In config file : config.username = 'awboy01'
+After updation in feature file : And form field username = username
+
+
+STEP 2:
+Already we are using this feature file into karate-config.js file, So need to specify this variable into
+called feature file place also
+
+Example:
+karate.callSingle('classpath:com/Auth/Authentication.feature', {username: config.username})
+
+username ==> name declared in authentication feature file
+config.user ==> value specified in karate-config.js file
+
+*********************************************************************************************************************
+Proxy configuration in karate for local execution
+==================================================
+(CAuthentication.feature, Ckarate-config.js, headers.js)
+
+Proxy will be set to karate-config.js file because it will be executed first 
+
+Proxy url for karate: http://hostname:port  Ex: https://10.246.3.249:3128
+
+Ex:
+karate.configure('proxy',  { uri: 'http://10.246.3.249:3128'})
+
+*********************************************************************************************************************
+
+Removing hardcoded value in config file
+=========================================
+
+(DAuthentication.feature, Dkarate-config.js, headers.js)
+
+	1) declare host and post value as config file and use this variable for proxy configuration
+
+Example:
+    config.proxy_host = '10.246.3.249'
+    config.proxy_post = '3128'
+
+    if (config.proxy_host && config.proxy_port) 
+	{
+        karate.configure('proxy', {uri:'http://' +config.proxy_host +':' +config.proxy_port})
+    }
+
+
+
+All installation and proxy setup is done. if you want to automate api, just write feature file and implement
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+INTEGRATE KARATE API INTO PIPELINE
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Few modification to be done for existing code to work those code in pipeline and local also
+
+Ekarate-config.js
+
+Modification 1:
+=================
+
+Our scripts to be run in local env as well as pipeline. so that karate-config.js file should be modified.
+set env variable, if env variable is "dev", specify all local configuration setups, else
+specify all pipeline configuration setups
+
+Refer: Ekarate-config.js
+
+
+Modification 2:
+=================
+if base url is declared in background, we may get "not set url error in pipeline". it can be avoided by specifing
+base url inside scenarios or scenarios outline
+
+Before:
+Feature: Authentication feature
+  Background:
+    * url 'https://qua.tda.dev.aws.renault.com'
+    * configure headers = read('classpath:headers.js')
+
+  Scenario: Authentication scenario
+    Then path '/api/v1/users/me'
+    And method GET
+    * print response
+
+After:
+Feature: Authentication feature
+  Background:
+    * configure headers = read('classpath:headers.js')
+
+  Scenario: Authentication scenario
+    * url 'https://qua.tda.dev.aws.renault.com'
+    Then path '/api/v1/users/me'
+    And method GET
+    * print response
+
+
+Create cucumber test and add into test plan
+==============================================
+Note: Test plan id will be specified in pipeline configuration. but all test should be
+added inside test plan so that all test scripts will be executed
+
+Refer: Add scripts in jira for pipeline.doc file
+
+
+
+Create schedular and Add yml file variables value into gitlab
+==============================================
+yml file variables:
+ARTIFACTORY_USER --> z027311
+ARTIFACTORY_TOKEN --> AKCpBrvapPJAHvbjBg415MLVjvWVpEGcbdkX5zL3roBG1hfgRoCCbmzBAaeQHJnFYJreftYQh
+PROXY_HOST --> web-proxy.infra.dub.aws.renault.azn
+PROXY_PORT --> 3128
+TEST_PLAN_JIRA_KEY --> TDPTF-3322
+
+Add xray intergration variable value into gitlab
+===================================================
+get-feature.sh 
+
+JIRA_XRAY_LOGIN  -->xraybot-tda
+JIRA_XRAY_PASSWD --> 2cDcvGb9iRAb5H
+XC_DEFAULT_TEST_PLAN --> TDPTF-7824
+
+
+Add karate-config.js file declared variable value into gitlab
+=============================================================
+Caps or Small not considered
+
+Ex:
+CLIENT_ID
+CLIENT_SECRET
+token_url or TOKEN_URL
+
+in karate declared variable:
+        config.token_url = java.lang.System.getenv('token_url')
+        config.client_id = java.lang.System.getenv('client_id')
+        config.client_secret = java.lang.System.getenv('client_secret')
+        config.username = java.lang.System.getenv('username')
+        config.password = java.lang.System.getenv('password')
+        config.scope = java.lang.System.getenv('scope')
+        config.proxy_host = java.lang.System.getenv('proxy_host')
+        config.proxy_port = java.lang.System.getenv('proxy_port')
+		
+		
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+HOW TO EXECUTE SCRIPT IN DIFFERENT ENV
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Observe the below feature file
+
+Feature: Authentication feature
+  Background:
+    * configure headers = read('classpath:headers.js')
+
+  Scenario: Authentication scenario
+    * url 'https://qua.tda.dev.aws.renault.com'
+    Then path '/api/v1/users/me'
+    And method GET
+    * print response
+
+Url is hardcoded here. if you wanna a execute in different env means
+url value will be set to karate-config.js file
+
+[Fkarate-config.js]
+
+Ex: 
+
+config.api_url = 'https://qua.tda.dev.aws.renault.com' (if statement)
+config.api_url = java.lang.System.getenv('api_url') (else statement)
+ 
+if you want to execute locally in different environemnt means
+update in karate-config file, everywhere will be reflected
+
+api_url value will be specified in gitlab. if you wannt to execute
+TES env, specify tes environment value in gitlab
+
+In feature file:
+Feature: Authentication feature
+  Background:
+    * configure headers = read('classpath:headers.js')
+
+  Scenario: Authentication scenario
+    * url api_url
+    Then path '/api/v1/users/me'
+    And method GET
+    * print response
+
+
+
+For pipeline execution specify api_url value in gitlab variable 
+also
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+UPDATE EXECUTION STATUS INTO JIRA
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Refer: .Fgitlab-ci.yml
+
+if you want to sent execution status into xray means. Make sure that ENABLE_KARATE is set to true in
+gitlab of pipeline scenarios variable session
+
+
+ENABLE_KARATE --> true
+
+---------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+

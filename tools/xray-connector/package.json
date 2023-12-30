@@ -1,0 +1,14 @@
+{
+  "name": "xray-manager",
+  "version": "1.0.0",
+  "description": "This module is used to get and push cucumber tests into jira (Xray)",
+  "scripts": {
+    "xc:get-features": "npx xray-get-features",
+    "xc:build-report": "npx xray-build-report",
+    "xc:build-gatling-report": "npx xray-build-gatling-report",
+    "xc:send-report": "npx xray-send-report"
+  },
+  "dependencies": {
+    "@rd/xray-connector": "1.0.18"
+  }
+}

@@ -1,0 +1,98 @@
+variables:
+  DEBUG: "1"
+
+  GLOBAL_PROXY: ${GLOBAL_PROXY}
+
+############### RUNNER TAGS ###############
+
+.tags_rlt: &tags_rlt
+  tags:
+    - rlt
+    - aws
+    - build
+    - docker
+
+stages:
+  - get-features
+  - functional-tests
+  - load-tests
+  - send-report
+
+############# LOAD TEST ###############
+
+get-features:
+  <<: *tags_rlt
+  image: node:10-alpine
+  stage: get-features
+  variables:
+    JIRA_XRAY_HOST: jira.dt.renault.com
+    XC_DEFAULT_TEST_PLAN: $TEST_PLAN_JIRA_KEY
+    XC_USE_XRAY_FEATURE_FILES: "false"
+    XC_FEATURES_DOWNLOAD_DIRECTORY: "../../src/test/java/com"
+    XC_TEST_PLAN_FILE: "../../src/test/java/test-plan.json"
+  script:
+    - apk add -Uuv curl
+    - rm -fr ${XC_FEATURES_DOWNLOAD_DIRECTORY}/ACTIVE
+    - cd tools/xray-connector
+    - curl -u${ARTIFACTORY_USER}:${ARTIFACTORY_TOKEN} "https://artifactory.dt.renault.com/artifactory/api/npm/npm-renault/auth/rd" > .npmrc
+    - npm install
+    - npm run xc:get-features
+  artifacts:
+    when: always
+    expire_in: 4 hrs
+    paths:
+      - src/test/java/com/ACTIVE
+      - src/test/java/test-plan.json
+
+functional-tests:
+  <<: *tags_rlt
+  image: adoptopenjdk:11-jdk-openj9-bionic
+  stage: functional-tests
+  allow_failure: true
+  variables:
+    http_proxy: "http://${PROXY_HOST}:${PROXY_PORT}"
+    https_proxy: "http://${PROXY_HOST}:${PROXY_PORT}"
+    no_proxy: "127.0.0.1,localhost"
+    GRADLE_OPTS: "-Dhttp.proxyHost=${PROXY_HOST} -Dhttp.proxyPort=${PROXY_PORT} -Dhttps.proxyHost=${PROXY_HOST} -Dhttps.proxyPort=${PROXY_PORT} -DnonProxyHosts=${no_proxy}"
+  script:
+    - ./gradlew --no-daemon test --tests AllApiTestsRunner
+  artifacts:
+    when: always
+    expire_in: 4 hrs
+    paths:
+      - build
+
+send-report-functional-tests:
+  <<: *tags_rlt
+  image: node:10-alpine
+  stage: send-report
+  variables:
+    JIRA_XRAY_HOST: jira.dt.renault.com
+    XC_DEFAULT_TEST_PLAN: $TEST_PLAN_JIRA_KEY
+    XC_FEATURES_DOWNLOAD_DIRECTORY: "../../src/test/java/com/renault"
+    XC_FEATURES_REPORT_DIRECTORY: "../../build/surefire-reports"
+    XC_MERGED_REPORT_DIRECTORY: "../../build/merged"
+    XC_TEST_ENVIRONMENT: $ENV
+    XC_TEST_LABELS: "${API_NAME},integration"
+  environment:
+    name: $API_NAME/$ENV/integration
+    url: https://$IRN.gitlab-pages.dt.renault.com/-/tda-blackbox-tests-api/-/jobs/$CI_JOB_ID/artifacts/report/cucumber/overview-features.html
+  script:
+    - mkdir -p ./report/cucumber && cp -R ./build/cucumber-html-reports/* ./report/cucumber
+    - apk add -Uuv curl
+    - cd tools/xray-connector
+    - curl -u${ARTIFACTORY_USER}:${ARTIFACTORY_TOKEN} "https://artifactory.dt.renault.com/artifactory/api/npm/npm-renault/auth/rd" > .npmrc
+    - npm install
+    - npm run xc:build-report
+    - npm run xc:send-report
+  artifacts:
+    when: always
+    expire_in: 2 week
+    paths:
+      - report/cucumber
+  needs:
+    - job: functional-tests
+      artifacts: true
+  rules:
+    - if: '$ENABLE_KARATE == "true" ||  $ENABLE_KARATE == "TRUE"'
+      when: on_success

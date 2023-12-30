@@ -1,0 +1,10 @@
+plugins {
+    id 'java'
+    id 'maven'
+    id 'scala'
+}
+
+apply from: 'gradle/karate.gradle'
+
+group 'com.trial'
+version '1.0-SNAPSHOT'

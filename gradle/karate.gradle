@@ -1,0 +1,59 @@
+ext {
+    karateVersion = '0.9.5'
+    gatlingVersion = '3.3.1'
+    cucumberVersion = '3.8.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile "com.intuit.karate:karate-junit5:${karateVersion}"
+    testCompile "com.intuit.karate:karate-apache:${karateVersion}"
+    testCompile "net.masterthought:cucumber-reporting:${cucumberVersion}"
+
+    testCompile "com.intuit.karate:karate-apache:${karateVersion}"
+    testCompile "com.intuit.karate:karate-gatling:${karateVersion}"
+    testCompile "io.gatling.highcharts:gatling-charts-highcharts:${gatlingVersion}"
+
+    testCompile "com.lihaoyi:ujson_2.12:1.2.0"
+
+    implementation 'org.scala-lang:scala-library:2.12.11'
+}
+
+sourceSets {
+    test {
+        resources {
+            srcDir file('src/test/java')
+            exclude '**/*.java'
+            exclude '**/*.scala'
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+    outputs.upToDateWhen { false }
+}
+
+task karateDebug(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'com.intuit.karate.cli.Main'
+}
+
+task gatlingRun(type: JavaExec) {
+    group = 'Web Tests'
+    description = 'Run Gatling Tests'
+
+    classpath = sourceSets.test.runtimeClasspath
+    main = "io.gatling.app.Gatling"
+
+    new File("${buildDir}/reports/gatling").mkdirs()
+    args = [
+            "-s", "com.simulations.GenericTest",
+            "-rf", "${buildDir}/reports/gatling"
+    ]
+
+    systemProperties System.properties
+}
